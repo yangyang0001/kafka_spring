@@ -1,0 +1,65 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.2.xsd 
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-3.2.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-3.2.xsd ">
+	<!-- 
+	加载db.properties文件中的内容，db.properties文件中key命名要有一定的特殊规则 
+	<context:property-placeholder location="classpath:db.properties" />
+	加载producerConfig.properties文件中的内容,producerConfig.properties文件中key命名要有一定的特殊规则
+	<context:property-placeholder location="classpath:producerConfig.properties" />
+	加载consumerConfig.properties文件中的内容,consumerConfig.properties文件中key命名要有一定的特殊规则
+	<context:property-placeholder location="classpath:consumerConfig.properties" />
+	-->
+
+	<!-- 扫描Spring的Bean,将其纳入Spring的管理,同时完成Bean的注入 -->
+	<context:component-scan base-package="com.inspur.**"></context:component-scan>
+	<mvc:annotation-driven></mvc:annotation-driven>
+	
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+	
+	<!-- 全局异常处理器！ 
+	<bean class="cn.itcast.ssm.exeption.MyExceptionResolver"></bean>
+	-->
+	
+	<!-- 文件上传 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 设置上传文件的最大尺寸为5MB -->
+		<property name="maxUploadSize">
+			<value>5242880</value>
+		</property>
+	</bean>
+	
+	<!-- 拦截器的配置 -->
+	<!-- 
+	<mvc:interceptors>
+		多个拦截器是按顺序执行的！
+		<mvc:interceptor>
+			对于URL的拦截;/**表示对根目录下的任何URL,以及根目录下的子目录的任何路径都可以拦截！/*:表示只是根路径下的链接！子目录就不拦截了！
+			<mvc:mapping path="/**"/>
+			<bean class="cn.itcast.ssm.interceptor.LoginInterceptor"></bean>
+		</mvc:interceptor>
+				
+		<mvc:interceptor>
+			对于URL的拦截;/**表示对根目录下的任何URL,以及根目录下的子目录的任何路径都可以拦截！
+			<mvc:mapping path="/**"/>
+			<bean class="cn.itcast.ssm.interceptor.MyInterceptor2"></bean>
+		</mvc:interceptor>
+ 			
+ 	</mvc:interceptors> 
+ 	-->
+
+</beans>

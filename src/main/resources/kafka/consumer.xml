@@ -1,0 +1,64 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.2.xsd 
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-3.2.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-3.2.xsd ">
+
+	<!-- 1.定义实例化KafkaConsumer的参数 -->
+	<bean id="consumerProperties" class="java.util.HashMap">
+		<constructor-arg>
+			<map>
+				<!-- 和producerCofig是一样的kafka_broker 代理链接(borker_list) -->
+				<entry key="bootstrap.servers" value="${bootstrap.servers}" />
+				<entry key="group.id" value="${group.id}" />
+				<entry key="enable.auto.commit" value="${enable.auto.commit}" />
+				<entry key="auto.commit.interval.ms" value="${auto.commit.interval.ms}" />
+				<entry key="key.deserializer" value="${key.deserializer}"/>  
+                <entry key="value.deserializer" value="${value.deserializer}"/>  
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<!-- 2.创建consumerFactory,采用默认的kafkaConsumerFactory-->
+	<bean id="consumerFactory"
+		class="org.springframework.kafka.core.DefaultKafkaConsumerFactory">
+		<constructor-arg>
+			<ref bean="consumerProperties" />
+		</constructor-arg>
+	</bean>
+
+	<!-- 3.自定义kafka消费者监听器,实现消费者具体业务处理逻辑-->
+	<bean id="consumerListener" class="com.inspur.consumer.listener.SpringKafkaConsumerListener" />
+
+	<!-- 4.消费者容器配置信息 -->
+	<bean id="containerProperties"
+		class="org.springframework.kafka.listener.config.ContainerProperties">
+		<!-- 可以指定多个主题,支持正则表达式形式 -->
+		<!-- <constructor-arg value="${defaultTopic}" /> -->
+		<constructor-arg>
+			<list>
+				<value>${defaultTopic}</value>
+			</list>
+		</constructor-arg>
+		<property name="messageListener" ref="consumerListener" />
+	</bean>
+
+	<!-- 5.创建一个支持多线程的Listener容器:ConcurrentMessageListenerContainer -->
+	<bean id="messageListenerContainer"
+		class="org.springframework.kafka.listener.ConcurrentMessageListenerContainer"
+		init-method="doStart">
+		<constructor-arg ref="consumerFactory" />
+		<constructor-arg ref="containerProperties" />
+		<!-- 指定线程数 -->
+		<property name="concurrency" value="${concurrency}"></property>
+	</bean>
+</beans>

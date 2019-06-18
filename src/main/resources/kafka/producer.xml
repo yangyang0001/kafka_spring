@@ -1,0 +1,48 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.2.xsd 
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-3.2.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-3.2.xsd ">
+
+	<!-- 1.定义实例化 KafkaProducer 的参数 -->
+	<bean id="producerProperties" class="java.util.HashMap">
+		<constructor-arg>
+			<map>
+				<entry key="bootstrap.servers" value="${bootstrap.servers}" />
+				<entry key="key.serializer" value="${key.serializer}" />
+				<entry key="value.serializer" value="${value.serializer}" />
+			</map>
+		</constructor-arg>
+	</bean>
+	
+	<!-- 2.实例化 DefaultKafkaProducerFactory,用于根据配置创建一个 Kafka Producer 实例 -->
+	<bean id="producerFactory" class="org.springframework.kafka.core.DefaultKafkaProducerFactory">
+		<constructor-arg>
+			<ref bean="producerProperties" />
+		</constructor-arg>
+	</bean>
+	
+	<!-- 3.实例化一个生产者监听器,用户监听消息是否生产成功,并做相应的处理 -->
+	<bean id="producerListener" class="com.inspur.producer.listener.SpringKafkaProducerListener" />
+	
+	<!-- 4.创建 kafkatemplate -->
+	<bean id="kafkaTemplate" class="org.springframework.kafka.core.KafkaTemplate">
+		<!-- 指定 Producer Factory 实例 -->
+		<constructor-arg index="0" ref="producerFactory" />
+		<!-- true:代表同步模式生产消息  -->
+		<constructor-arg index="1" value="true" />
+		<!-- 指定一个默认的主题 -->
+		<property name="defaultTopic" value="${defaultTopic}" />
+		<!-- 指定一个自定义的 ProducerListener -->
+		<property name="producerListener" ref="producerListener" />
+	</bean>
+</beans>
